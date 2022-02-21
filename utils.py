@@ -300,27 +300,27 @@ def extract_all_points(original, after_threshold):
 
     colors = []
     for idx, contour in enumerate(sorted_contours):
-        # cv2.putText(image_with_boxes, f"{idx}", contour[0], font, 0.9, (0, 0, 0), 3)
-        # cv2.circle(image_with_boxes, contour[0], 8, (0, 0, 255), -1)
-        # cv2.circle(image_with_boxes, contour[1], 8, (0, 255, 0), -1)
-        # cv2.circle(image_with_boxes, contour[2], 8, (255, 0, 0), -1)
-        # cv2.circle(image_with_boxes, contour[3], 8, (255, 0, 255), -1)
         x, y, w, h = cv2.boundingRect(np.array([contour]))
 
-        padding = 6
+        padding = 12
         ROI = original[y+padding:y +
                        h-padding, x+padding:x+w-padding]
         colors.append(np.average(ROI, axis=(0, 1)))
+
     return image, np.array(sorted_contours), colors
 
 
 def draw_contours(image, contours):
     for idx, contour in enumerate(contours):
-        cv2.putText(image, f"{idx}", contour[0] + 30, font, 0.9, (0, 0, 0), 3)
+        cv2.putText(image, f"{idx}", contour[0] + (30, 50), font, 0.9, (0, 0, 0), 3)
         cv2.circle(image, contour[0], 8, (0, 0, 255), -1)
         cv2.circle(image, contour[1], 8, (0, 255, 0), -1)
         cv2.circle(image, contour[2], 8, (255, 0, 0), -1)
         cv2.circle(image, contour[3], 8, (255, 0, 255), -1)
+
+        padding = 12
+        x, y, w, h = cv2.boundingRect(np.array([contour]))
+        image = cv.rectangle(image, (x+padding, y+padding), (x+w-padding, y+h-padding), (0, 255, 0), 2)
     return image
 
 
