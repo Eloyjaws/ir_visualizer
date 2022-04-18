@@ -1,9 +1,10 @@
+from re import A
 import streamlit as st
 from PIL import Image
 import cv2
 import numpy as np
 import colour
-
+import pickle
 
 import utils
 
@@ -15,6 +16,10 @@ def convert_from_cv2_to_image(img: np.ndarray) -> Image:
 def convert_from_image_to_cv2(img: Image) -> np.ndarray:
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
+def load_model():
+    with open('bcp0.model', 'rb') as file:
+        model = pickle.load(file)
+    return model
 
 def main():
     st.sidebar.title("Filter Extraction Visualizer")
@@ -123,11 +128,18 @@ def main():
                 use_column_width=True,
             )
 
+        model = load_model()
+
+        BC = model.predict([[filter_value[2]]])
+
         st.markdown("### Extracted RGB Values")
-        col1, col2, col3 = st.columns(3)
-        col1.error(f"R: {filter_value[2]:.2f}")
-        col2.success(f"G: {filter_value[1]:.2f}")
-        col3.info(f"B: {filter_value[0]:.2f}")
+        col1, col2, col3, col4 = st.columns(4)
+        col1.error(f"R: {filter_value[2]:.3f}")
+        col2.success(f"G: {filter_value[1]:.3f}")
+        col3.info(f"B: {filter_value[0]:.3f}")
+        col4.warning(f"BC: {BC[0]:.3f}")
+
+
 
 
 if __name__ == "__main__":
