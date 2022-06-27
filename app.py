@@ -1,4 +1,3 @@
-from re import A
 import streamlit as st
 from PIL import Image
 import cv2
@@ -102,13 +101,27 @@ def main():
         # Store RGB values of extracted boxes
         rgbs = [np.array(list(reversed(bgrs))) for bgrs in target_colors]
 
-        # Apply color correction
-        color_corrected_image = input_image.copy()
+        """
+        Apply color correction
+        This technique ensures that the color correction process does not leave red artifacts
+        https://stackoverflow.com/questions/62993366/color-calibration-with-color-checker-using-using-root-polynomial-regression-not
+        """
+        # Create a float copy
+        color_corrected_image = input_image.astype(np.float)
+        # Normalise the image to have pixel values from 0 to 1
+        color_corrected_image = (color_corrected_image - np.min(color_corrected_image))/np.ptp(color_corrected_image)
+        # Decode the image with sRGB EOTF
+        color_corrected_image = colour.models.eotf_sRGB(color_corrected_image)
         if apply_color_correction:
             for row in color_corrected_image:
-                row[:] = colour.colour_correction(
-                    row[:], target_colors, ref_colors, "Vandermonde"
-                )
+                row[:] = colour.colour_correction(row[:], target_colors, ref_colors, 'Finlayson 2015')
+        
+        # Encode image back to sRGB
+        color_corrected_image = colour.models.eotf_inverse_sRGB(color_corrected_image)  
+        # Denormalize image to fit 255 pixel values (also clip to ensure values fall between 0 - 255)
+        color_corrected_image = np.clip((color_corrected_image * 255), 0, 255)
+        # Convert floats back to integers
+        color_corrected_image = color_corrected_image.astype(np.uint8)
 
         if apply_color_correction and show_image_after_cc:
             st.caption("Color Corrected Image")
@@ -118,7 +131,7 @@ def main():
 
         # Extract filter
         filter_value, corrected_image_with_outline = utils.extract_filter(
-            color_corrected_image, show_circle=show_extracted_circles
+            color_corrected_image, radius=24, show_circle=show_extracted_circles
         )
 
         if show_extracted_circles:
