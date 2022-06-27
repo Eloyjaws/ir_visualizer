@@ -101,11 +101,11 @@ def main():
         # Store RGB values of extracted boxes
         rgbs = [np.array(list(reversed(bgrs))) for bgrs in target_colors]
 
-        """
-        Apply color correction
-        This technique ensures that the color correction process does not leave red artifacts
-        https://stackoverflow.com/questions/62993366/color-calibration-with-color-checker-using-using-root-polynomial-regression-not
-        """
+        # """
+        # Apply color correction
+        # This technique ensures that the color correction process does not leave red artifacts
+        # https://stackoverflow.com/questions/62993366/color-calibration-with-color-checker-using-using-root-polynomial-regression-not
+        # """
         # Create a float copy
         color_corrected_image = input_image.astype(np.float)
         # Normalise the image to have pixel values from 0 to 1
